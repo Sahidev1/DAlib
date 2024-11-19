@@ -5,11 +5,11 @@
 //dynamic data node
 typedef struct Node {
     void* dataPtr;
-    int size;
+    int data_size;
     struct Node* next;
 } node;
 
-node* create_node(int size, node* next);
+node* create_node(int data_size, node* next);
 void delete_node(node* n);
 void traverse_nodes(node* root, int (*cb)(node*));
 
