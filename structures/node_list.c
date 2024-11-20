@@ -13,6 +13,12 @@ node_list* create_nodelist(int elem_size){
 //O(n)
 int add(node_list* l,void* E){
     node* curr = l->root;
+    if(curr == NULL){
+        l->root = create_node(l->elem_size, NULL);
+        memcpy(l->root->dataPtr, E, l->elem_size);
+        l->elem_count++;
+        return 0;
+    }
     node* prev = NULL;
     while(curr != NULL){
         prev = curr;
@@ -59,7 +65,10 @@ int removeIndex(node_list* l, int index, void* retData){
 
     if(curr == NULL) return -1;
 
-    prev->next = curr->next;
+    if(prev == NULL) l->root = curr->next;
+    else prev->next = curr->next;
+    
+
     if(retData != NULL) memcpy(retData, curr->dataPtr, l->elem_size);
     delete_node(curr);
     l->elem_count--;
