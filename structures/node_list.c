@@ -11,7 +11,12 @@ node_list* create_nodelist(int elem_size){
 }
 
 //O(n)
-int add(node_list* l,void* E){
+int push(node_list* l,void* E){
+    return add(l, E, l->elem_count);
+}
+
+int add(node_list* l, void* E, int index){
+    if(index > l->elem_count || index < 0) return 1;
     node* curr = l->root;
     if(curr == NULL){
         l->root = create_node(l->elem_size, NULL);
@@ -20,19 +25,23 @@ int add(node_list* l,void* E){
         return 0;
     }
     node* prev = NULL;
-    while(curr != NULL){
+    int i = 0;
+    while(curr != NULL && i < index){
         prev = curr;
         curr = curr->next;
-    }
+        i++;
+    };
 
-    if(prev == NULL){ 
+    if(prev == NULL){
         l->root = create_node(l->elem_size, NULL);
         memcpy(l->root->dataPtr, E, l->elem_size);
-    } else {
-        prev->next = create_node(l->elem_size, NULL);
-        prev = prev->next;
+    } 
+    else {
+        node* n = create_node(l->elem_size, NULL);
+        n->next = curr;
+        prev->next = n;
         memcpy(prev->dataPtr, E, l->elem_size);
-    }  
+    }
     l->elem_count++;
     return 0;
 }

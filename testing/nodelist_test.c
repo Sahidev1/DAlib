@@ -25,7 +25,7 @@ int main(int argc, char** argv){
     int tmp;
     for (int i = 0; i < NR_ELEMS; i++){
         tmp = rand() % 1000;
-        add(l, &tmp);
+        push(l, &tmp);
     }
     
     traverse_list(l, fun);
@@ -39,7 +39,7 @@ int main(int argc, char** argv){
     while(i++ < opCount){
         if(rand()%2 == 0){
             tmp = rand();
-            add(l, &tmp);
+            push(l, &tmp);
             elemsCnt++;
         } else {
             removeIndex(l,rand()%elemsCnt--, NULL);

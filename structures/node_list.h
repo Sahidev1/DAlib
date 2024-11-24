@@ -10,7 +10,8 @@ typedef struct Node_list{
 }node_list;
 
 node_list* create_nodelist(int elem_size);
-int add(node_list* l,void* E);
+int add(node_list* l,void* E, int index);
+int push(node_list* l, void* E);
 void* get(node_list* l, int index);
 int removeIndex(node_list* l, int index, void* retData);
 int destoy_nodelist(node_list* l);

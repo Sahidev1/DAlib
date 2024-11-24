@@ -32,4 +32,9 @@ typedef struct {
     vector_options opts;
 } vector;
 
+int add(vector* v, void* E, int index);
+int remove(vector* v, int index, void* ret_E);
+vector* create_vector(int elem_size, vector_options* opts);
+int destroy_vector(vector* v);
+
 #endif
