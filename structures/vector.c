@@ -19,13 +19,15 @@
     * @return the size of the array
 */
 int calculate_arr_size(int base, int n, inflation f){
+    int val;
     if (f == GREEDY){
-        return base*(1<<n);
+        val = base*(1<<n);
     }
-    printf("n: %d\n", n);
     if (f == CONSERVATIVE){
-        return base * (((int) pow(3, n))/(1<<n));
+        val = base * ((int)(pow(3, n)/(1<<n)));
     }
+    printf("val: %d, inflations: %d\n", val, n);
+    return val;
 }
 
 /*

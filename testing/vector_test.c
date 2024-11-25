@@ -18,28 +18,35 @@ int main(int argc, char** argv){
         srand(time(NULL));
     }
     
-
-    vector* v = create_vector(sizeof(int), NULL);
+    vector_options opts = {.deflate_enable = DEFLATE_ENABLE, .init_arrsize = 8, .min_elems = 8, .inflation = CONSERVATIVE};
+    vector* v = create_vector(sizeof(int), &opts);
 
 
     printf("created\n");
 
+    //print all vector data
+    printf("inflation policy: %d\n", v->opts.inflation);
     
-    const int NR_ELEMS = 1000;
+    const int NR_ELEMS = 36411;
     int tmp;
     for (int i = 0; i < NR_ELEMS; i++){
         tmp = rand() % 1000;
         push(v, &tmp);
     }
+
+    //remove 10k elements
+    int elemsCnt = NR_ELEMS;
+    for (int i = 0; i < 35751; i++){
+        removeIndex(v,rand()%elemsCnt--, NULL);
+    }
     
     
-    traverse_list(v, fun);
+   // traverse_list(v, fun);
     printf("adds done\n");
 
 
-    int elemsCnt = NR_ELEMS;
 
-    int opCount = (NR_ELEMS) * 50;
+    int opCount = (NR_ELEMS) * 2;
     int i = 0;
     int rem = 0;
     while(i++ < opCount){
@@ -50,7 +57,7 @@ int main(int argc, char** argv){
         } else {
 
             rem = elemsCnt <= 0? elemsCnt: rand()%(elemsCnt--);
-            printf("index: %d, elemsCnt: %d, rem: %d, arrsize: %d\n",i, v->elem_count, rem, v->arr_size);
+            //printf("index: %d, elemsCnt: %d, rem: %d, arrsize: %d\n",i, v->elem_count, rem, v->arr_size);
             removeIndex(v,rem, NULL);
         }
     }
@@ -60,10 +67,13 @@ int main(int argc, char** argv){
 
    
     printf("\n\n\n");
-    traverse_list(v, fun);
+    //traverse_list(v, fun);
+
+    printf("inflations: %d, arrsize: %d  \n", v->inflations,v->arr_size);
 
     destroy_vector(v); 
     
+
 
     return 0;
 } 
