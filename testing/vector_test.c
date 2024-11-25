@@ -18,7 +18,7 @@ int main(int argc, char** argv){
         srand(time(NULL));
     }
     
-    vector_options opts = {.deflate_enable = DEFLATE_ENABLE, .init_arrsize = 8, .min_elems = 8, .inflation = CONSERVATIVE};
+    vector_options opts = {.deflate_enable = DEFLATE_ENABLE, .init_arrsize = 8, .min_arrsize = 8, .inflation = CONSERVATIVE};
     vector* v = create_vector(sizeof(int), &opts);
 
 
@@ -69,7 +69,7 @@ int main(int argc, char** argv){
     printf("\n\n\n");
     //traverse_list(v, fun);
 
-    printf("inflations: %d, arrsize: %d  \n", v->inflations,v->arr_size);
+    printf("inflations: %d, arrsize: %lld  \n", v->inflations,v->arr_size);
 
     destroy_vector(v); 
     

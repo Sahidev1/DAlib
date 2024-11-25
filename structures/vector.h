@@ -1,6 +1,8 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <stddef.h>
+
 #define DEFLATE_ENABLE 0
 #define DEFLATE_DISABLE 1
 
@@ -17,27 +19,27 @@ typedef enum inflation {
 
 typedef struct {
     int deflate_enable;
-    int init_arrsize;
-    int min_elems;
+    long long init_arrsize;
+    long long min_arrsize;
     inflation inflation;
 } vector_options;
 
 typedef struct {
-    int elem_size;
-    int elem_count;
-    int arr_size;
+    size_t elem_size;
+    long long elem_count;
+    long long arr_size;
     int inflations;
     void* array;
     vector_options opts;
 } vector;
 
-int add(vector* v, void* E, int index);
+int add(vector* v, void* E, long long index);
 int push(vector* v, void* E);
-void* get(vector* v, int index);
-int removeIndex(vector* v, int index, void* ret_E);
-vector* create_vector(int elem_size, vector_options* opts);
+void* get(vector* v, long long index);
+int removeIndex(vector* v, long long index, void* ret_E);
+vector* create_vector(size_t elem_size, vector_options* opts);
 int destroy_vector(vector* v);
-int traverse_list(vector* v, void* (*cb)(void*, int index));
-int get_size(vector* v);
+int traverse_list(vector* v, void* (*cb)(void*, long long index));
+long long get_size(vector* v);
 
 #endif

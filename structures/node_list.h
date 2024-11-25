@@ -18,7 +18,7 @@ int removeIndex(node_list* l, long long index, void* retData);
 int destoy_nodelist(node_list* l);
 int traverse_list(node_list* l, void* (*cb)(void*, long long index));
 int iterate_callback(node_list* l, long long from, long long to_excl, void* (*cb)(void*, long long index));
-size_t get_size(node_list* l);
+long long get_size(node_list* l);
 
 #endif
 

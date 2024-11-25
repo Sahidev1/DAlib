@@ -10,7 +10,7 @@
 #define DEFAULT_FLATION (GREEDY)
 
 
-int get_size(vector* v){
+long long get_size(vector* v){
     return v->elem_count;
 }
 
@@ -21,16 +21,13 @@ int get_size(vector* v){
     * @param f: the inflation strategy
     * @return the size of the array
 */
-int calculate_arr_size(int base, int n, inflation f){
-    int val;
+long long calculate_arr_size(long long base, int n, inflation f){
     if (f == GREEDY){
-        val = base*(1<<n);
+        return base*(1<<n);
     }
     if (f == CONSERVATIVE){
-        val = base * ((int)(pow(3, n)/(1<<n)));
+        return base * ((int)(pow(3, n)/(1<<n)));
     }
-    printf("val: %d, inflations: %d\n", val, n);
-    return val;
 }
 
 /*
@@ -40,7 +37,7 @@ int calculate_arr_size(int base, int n, inflation f){
 */
 int deflate(vector* v){
     if(v == NULL) return NULL_VECTOR;
-    if(v->arr_size <= v->opts.min_elems || v->inflations == 0) return 0;
+    if(v->arr_size <= v->opts.min_arrsize || v->inflations == 0) return 0;
     v->inflations--;
     v->arr_size = calculate_arr_size(v->opts.init_arrsize, v->inflations, v->opts.inflation);
     v->array = realloc(v->array, v->arr_size*v->elem_size);
@@ -70,16 +67,17 @@ int inflate(vector *v){
     * @param to: the index to shift to
     * @return 0 if the shift was successful, NULL_VECTOR if the vector is NULL
 */
-int shift_elems_right(vector* v, int from, int to){
+int shift_elems_right(vector* v, long long from, long long to){
     if (v == NULL) return NULL_VECTOR;
 
-    int i = to;
+    long long i = to;
     void* arr = v->array;
-    int esz = v->elem_size;
+    long long esz = v->elem_size;
     while(i > from){
         memcpy((char*) arr + (i * esz), (char*)arr + ((i - 1) * esz), esz);
         i--;
     }
+
 
     return 0;
 }
@@ -94,9 +92,9 @@ int shift_elems_right(vector* v, int from, int to){
 int shift_elems_left(vector *v, int from, int to){
     if (v == NULL) return NULL_VECTOR;
 
-    int i = from; 
+    long long i = from; 
     void* arr = v->array;
-    int esz = v->elem_size;
+    long long esz = v->elem_size;
 
     while(i < to){
         memcpy((char*)arr + (i * esz), (char*)arr + ((i+1) *esz), esz);
@@ -113,7 +111,7 @@ int shift_elems_left(vector *v, int from, int to){
     * @param index: the index to add the element to
     * @return 0 if the element was added successfully, NULL_VECTOR if the vector is NULL, INDEX_OUT_BOUND if the index is out of bounds
 */
-int add(vector* v, void* E, int index){
+int add(vector* v, void* E, long long index){
     if(v == NULL) return NULL_VECTOR;
     if(index > v->elem_count || index < 0) return INDEX_OUT_BOUND;
     if (v->elem_count >= v->arr_size){
@@ -142,7 +140,7 @@ int push(vector* v, void* E){
     * @param ret_E: the element to remove
     * @return 0 if the element was removed successfully, NULL_VECTOR if the vector is NULL, INDEX_OUT_BOUND if the index is out of bounds
 */
-int removeIndex(vector* v, int index, void* ret_E){
+int removeIndex(vector* v, long long index, void* ret_E){
     if(v == NULL) return 1;
     if(index >= v->elem_count || index < 0) return 1;
     
@@ -162,7 +160,7 @@ int removeIndex(vector* v, int index, void* ret_E){
     return 0;
 }
 
-void* get(vector* v, int index){
+void* get(vector* v, long long index){
     if(v == NULL) return NULL;
     if(index >= v->elem_count || index < 0) return NULL;
 
@@ -174,7 +172,7 @@ void* get(vector* v, int index){
     * @param opts: the options for the vector
     * @return a pointer to the vector
 */
-vector* create_vector(int elem_size, vector_options* opts){
+vector* create_vector(size_t elem_size, vector_options* opts){
     vector* vect = malloc(sizeof(vector));
 
     vector_options* opt_ptr = &vect->opts;
@@ -182,7 +180,7 @@ vector* create_vector(int elem_size, vector_options* opts){
         opt_ptr->deflate_enable = DEFAULT_DEFLATE_MODE;
         opt_ptr->inflation = DEFAULT_FLATION;
         opt_ptr->init_arrsize = DEFAULT_INIT_ELEMCOUNT;
-        opt_ptr->min_elems = DEFAULT_MIN_ELEMS;
+        opt_ptr->min_arrsize = DEFAULT_MIN_ELEMS;
     }
     else memcpy(opt_ptr, opts, sizeof(vector_options));
 
@@ -198,7 +196,7 @@ vector* create_vector(int elem_size, vector_options* opts){
 
 
 
-int traverse_list(vector* v, void* (*cb)(void*, int index)){
+int traverse_list(vector* v, void* (*cb)(void*, long long index)){
     int i = 0;
     int to = v->elem_count;
 
