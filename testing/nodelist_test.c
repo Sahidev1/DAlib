@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-void* fun(void * v, int index){
+void* fun(void * v, long long index){
     int* a = v;
-    printf("index: %d, value: %d\n", index, *a);
+    printf("index: %lld, value: %d\n", index, *a);
 }
 
 

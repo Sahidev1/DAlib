@@ -10,6 +10,9 @@
 #define DEFAULT_FLATION (GREEDY)
 
 
+int get_size(vector* v){
+    return v->elem_count;
+}
 
 /*
     * Calculate the size of the array based on the inflation strategy
@@ -159,6 +162,13 @@ int removeIndex(vector* v, int index, void* ret_E){
     return 0;
 }
 
+void* get(vector* v, int index){
+    if(v == NULL) return NULL;
+    if(index >= v->elem_count || index < 0) return NULL;
+
+    return (char*)v->array + (v->elem_size * index);
+}
+
 /* create a vector
     * @param elem_size: the size of the elements in the vector
     * @param opts: the options for the vector
@@ -185,6 +195,8 @@ vector* create_vector(int elem_size, vector_options* opts){
 
     return vect;
 }
+
+
 
 int traverse_list(vector* v, void* (*cb)(void*, int index)){
     int i = 0;

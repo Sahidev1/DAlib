@@ -14,7 +14,6 @@ typedef enum inflation {
     CONSERVATIVE
 } inflation;
 
-typedef enum inflation deflation;
 
 typedef struct {
     int deflate_enable;
@@ -34,9 +33,11 @@ typedef struct {
 
 int add(vector* v, void* E, int index);
 int push(vector* v, void* E);
+void* get(vector* v, int index);
 int removeIndex(vector* v, int index, void* ret_E);
 vector* create_vector(int elem_size, vector_options* opts);
 int destroy_vector(vector* v);
 int traverse_list(vector* v, void* (*cb)(void*, int index));
+int get_size(vector* v);
 
 #endif
