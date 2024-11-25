@@ -8,6 +8,7 @@ node_list* create_nodelist(size_t elem_size){
     l->elem_size = elem_size;
     l->elem_count = 0;
     l->root = NULL;
+    return l;
 }
 
 long long get_size(node_list* l){
