@@ -5,7 +5,6 @@
 //dynamic data node
 typedef struct Node {
     void* dataPtr;
-    int data_size;
     struct Node* next;
 } node;
 

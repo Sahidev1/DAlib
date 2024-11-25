@@ -5,7 +5,6 @@
 node* create_node(int data_size, node* next){
     void* mem_chunk = malloc(sizeof(node) + data_size);
     ((node*) mem_chunk)->dataPtr = mem_chunk + sizeof(node);
-    ((node*) mem_chunk)->data_size = data_size;
     ((node*) mem_chunk)->next = next;
     return (node*) mem_chunk;
 }
