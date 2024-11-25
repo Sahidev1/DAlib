@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 #include "vector.h"
 
 #define DEFAULT_MIN_ELEMS 4
@@ -21,6 +22,7 @@ int calculate_arr_size(int base, int n, inflation f){
     if (f == GREEDY){
         return base*(1<<n);
     }
+    printf("n: %d\n", n);
     if (f == CONSERVATIVE){
         return base * (((int) pow(3, n))/(1<<n));
     }
@@ -33,10 +35,14 @@ int calculate_arr_size(int base, int n, inflation f){
 */
 int deflate(vector* v){
     if(v == NULL) return NULL_VECTOR;
-    if(v->arr_size <= v->opts.min_elems) return 0;
+    if(v->arr_size <= v->opts.min_elems || v->inflations == 0) return 0;
     v->inflations--;
     v->arr_size = calculate_arr_size(v->opts.init_arrsize, v->inflations, v->opts.inflation);
-    v->array = realloc(v->array, v->arr_size);
+    v->array = realloc(v->array, v->arr_size*v->elem_size);
+    if (v->array == NULL) {
+        printf("realloc failed\n");
+        exit(3);
+    }
 }
 
 /*
@@ -48,7 +54,8 @@ int inflate(vector *v){
     if(v == NULL) return NULL_VECTOR;
     v->inflations++;
     v->arr_size = calculate_arr_size(v->opts.init_arrsize, v->inflations, v->opts.inflation);
-    v->array = realloc(v->array, v->arr_size);
+    v->array = realloc(v->array, v->arr_size*v->elem_size);
+    return 0;
 }
 
 /*
@@ -65,7 +72,7 @@ int shift_elems_right(vector* v, int from, int to){
     void* arr = v->array;
     int esz = v->elem_size;
     while(i > from){
-        memcpy(arr + (i * esz), arr + ((i - 1) * esz), esz);
+        memcpy((char*) arr + (i * esz), (char*)arr + ((i - 1) * esz), esz);
         i--;
     }
 
@@ -87,7 +94,7 @@ int shift_elems_left(vector *v, int from, int to){
     int esz = v->elem_size;
 
     while(i < to){
-        memcpy(arr + (i * esz), arr + ((i+1) *esz), esz);
+        memcpy((char*)arr + (i * esz), (char*)arr + ((i+1) *esz), esz);
         i++;
     }
 
@@ -110,14 +117,18 @@ int add(vector* v, void* E, int index){
 
 
     if (index == v->elem_count){
-        memcpy((v->array + (v->elem_size*index)), E, v->elem_size);
+        memcpy(((char*)v->array + (v->elem_size*index)), E, v->elem_size);
     } else {
         shift_elems_right(v, index, v->elem_count);
-        memcpy(v->array + (v->elem_size * index), E, v->elem_size);
+        memcpy((char*)v->array + (v->elem_size * index), E, v->elem_size);
     }
 
     v->elem_count++;
     return 0;
+}
+
+int push(vector* v, void* E){
+    return add(v, E, v->elem_count);
 }
 
 /* remove an element from the vector
@@ -126,12 +137,12 @@ int add(vector* v, void* E, int index){
     * @param ret_E: the element to remove
     * @return 0 if the element was removed successfully, NULL_VECTOR if the vector is NULL, INDEX_OUT_BOUND if the index is out of bounds
 */
-int remove(vector* v, int index, void* ret_E){
-    if(v == NULL) return NULL;
-    if(index >= v->elem_count || index < 0) return NULL;
+int removeIndex(vector* v, int index, void* ret_E){
+    if(v == NULL) return 1;
+    if(index >= v->elem_count || index < 0) return 1;
     
     if (ret_E != NULL){
-        memcpy(ret_E, v->array + (v->elem_size* index), v->elem_size);
+        memcpy(ret_E, (char*)v->array + (v->elem_size* index), v->elem_size);
     }
 
     if(index != v->elem_count - 1){
@@ -139,7 +150,7 @@ int remove(vector* v, int index, void* ret_E){
     }
     v->elem_count--;
 
-    if(v->opts.deflate_enable == DEFLATE_ENABLE && v->elem_count < v->arr_size / 2){
+    if(v->opts.deflate_enable == DEFLATE_ENABLE && v->arr_size > v->opts.init_arrsize && v->elem_count < v->arr_size / 2){
         deflate(v);    
     }
 
@@ -153,6 +164,7 @@ int remove(vector* v, int index, void* ret_E){
 */
 vector* create_vector(int elem_size, vector_options* opts){
     vector* vect = malloc(sizeof(vector));
+
     vector_options* opt_ptr = &vect->opts;
     if (opts == NULL){
         opt_ptr->deflate_enable = DEFAULT_DEFLATE_MODE;
@@ -160,7 +172,9 @@ vector* create_vector(int elem_size, vector_options* opts){
         opt_ptr->init_arrsize = DEFAULT_INIT_ELEMCOUNT;
         opt_ptr->min_elems = DEFAULT_MIN_ELEMS;
     }
-    memcpy(opt_ptr, opts, sizeof(vector_options));
+    else memcpy(opt_ptr, opts, sizeof(vector_options));
+
+
     vect->elem_count = 0;
     vect->elem_size = elem_size;
     vect->inflations = 0;
@@ -168,6 +182,17 @@ vector* create_vector(int elem_size, vector_options* opts){
     vect->array = malloc(elem_size * vect->arr_size);
 
     return vect;
+}
+
+int traverse_list(vector* v, void* (*cb)(void*, int index)){
+    int i = 0;
+    int to = v->elem_count;
+
+    while(i < to){
+        cb((char*)v->array + (i * v->elem_size), i++);
+    }
+
+    return 0;
 }
 
 /* destroy a vector

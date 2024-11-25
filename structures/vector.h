@@ -33,8 +33,10 @@ typedef struct {
 } vector;
 
 int add(vector* v, void* E, int index);
-int remove(vector* v, int index, void* ret_E);
+int push(vector* v, void* E);
+int removeIndex(vector* v, int index, void* ret_E);
 vector* create_vector(int elem_size, vector_options* opts);
 int destroy_vector(vector* v);
+int traverse_list(vector* v, void* (*cb)(void*, int index));
 
 #endif
