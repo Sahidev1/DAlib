@@ -45,7 +45,7 @@ int add(node_list* l, void* E, long long index){
         node* n = create_node(l->elem_size, NULL);
         n->next = curr;
         prev->next = n;
-        memcpy(prev->dataPtr, E, l->elem_size);
+        memcpy(n->dataPtr, E, l->elem_size);
     }
     l->elem_count++;
     return 0;
@@ -72,9 +72,10 @@ int removeIndex(node_list* l, long long index, void* retData){
 
     node* prev = NULL;
     long long i = 0;
-    while(curr != NULL && i++ < index){
+    while(curr != NULL && i < index){
         prev = curr;
         curr = curr->next;
+        i++;
     }
 
     if(curr == NULL) return -1;

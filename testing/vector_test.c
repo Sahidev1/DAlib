@@ -18,7 +18,7 @@ int main(int argc, char** argv){
         srand(time(NULL));
     }
     
-    vector_options opts = {.deflate_enable = DEFLATE_ENABLE, .init_arrsize = 8, .min_arrsize = 8, .inflation = CONSERVATIVE};
+    vector_options opts = {.deflate_enable = DEFLATE_ENABLE, .init_arrsize = 8, .min_arrsize = 8, .inflation = CONSERVATIVE };
     vector* v = create_vector(sizeof(int), &opts);
 
 

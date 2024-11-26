@@ -42,9 +42,9 @@ int deflate(vector* v){
     v->arr_size = calculate_arr_size(v->opts.init_arrsize, v->inflations, v->opts.inflation);
     v->array = realloc(v->array, v->arr_size*v->elem_size);
     if (v->array == NULL) {
-        printf("realloc failed\n");
         exit(3);
     }
+    return 0;
 }
 
 /*
