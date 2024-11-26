@@ -39,7 +39,7 @@ int main(int argc, char** argv){
     assert(list->elem_count == 1);
     assert(get_size(list) == 1);
 
-    traverse_list(list, printer);
+//    traverse_list(list, printer);
 
 
     // get element test
@@ -51,7 +51,7 @@ int main(int argc, char** argv){
     assert(saved_elem->x = e.x);
     assert(saved_elem->y = e.y);
 
-    traverse_list(list, printer);
+   // traverse_list(list, printer);
 
 
     // push test
@@ -61,12 +61,11 @@ int main(int argc, char** argv){
     assert(list->elem_count == 2);
     assert(get_size(list) == 2);
 
-    traverse_list(list, printer);
+ //   traverse_list(list, printer);
 
     // remove test
     assert(removeIndex(list, 0, &e) == 0);    
     assert(get_size(list) == 1);
-    printf("x: %d\n", e.x);
     assert(e.x == 32);
     assert(removeIndex(list,0,&e) == 0);
     assert(get_size(list) == 0);
