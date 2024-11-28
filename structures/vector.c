@@ -2,6 +2,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdint.h>
 #include "vector.h"
 
 #define DEFAULT_MIN_ELEMS 4
@@ -190,6 +191,23 @@ vector* create_vector(size_t elem_size, vector_options* opts){
     vect->inflations = 0;
     vect->arr_size = opt_ptr->init_arrsize;
     vect->array = malloc(elem_size * vect->arr_size);
+
+    return vect;
+}
+
+vector* create_vector_from_array(init_array_options init){
+    vector* vect = malloc(sizeof(vector));
+    vect->arr_size = init.arr_size;
+    vect->elem_count = init.elem_count;
+    vect->elem_size = init.elem_size;
+    vect->inflations = init.inflation;
+
+    vect->opts.deflate_enable = init.deflate_enable;
+    vect->opts.inflation = init.inflation;
+    vect->opts.init_arrsize = init.arr_size;
+    vect->opts.min_arrsize = init.min_arrsize;
+
+    vect->array = init.array;
 
     return vect;
 }
