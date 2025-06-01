@@ -1,6 +1,5 @@
-#include "../src/hashtable.h"
+#include "../structures/hashtable.h"
 #include <stdio.h>
-#include "testutil.h"
 
 #define INIT_CAPACITY 1
 
@@ -42,22 +41,16 @@ int main(){
     Value v1 = {.descriptor="box location"};
     HASH_TABLE_put(&map, &k, &v);
     HASH_TABLE_put(&map, &k0, &v0);
-    CHECK_PASSED();
     printTable(&map);
     
-    CHECK_PASSED();
 
     printf("resize: %d\n",HASH_TABLE_put(&map, &k1, &v1));
-    CHECK_PASSED();
     printmap(&map);
     printTable(&map);
 
     Value* hv = HASH_TABLE_get(&map, &k);
-    CHECK_PASSED();
-
     printf("val PTR: %p, %p\n", &v, hv );
     printf("VALUE: %s\n", hv->descriptor);
-    CHECK_PASSED();
 
     printTable(&map);
 

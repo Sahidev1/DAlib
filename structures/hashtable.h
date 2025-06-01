@@ -35,6 +35,7 @@ int HASH_TABLE_init(hash_table *map, const uint32_t INIT_CAPACITY, hkey_t (*hash
 int HASH_TABLE_put(hash_table *map, void *key_ptr, void *val_ptr);
 void **HASH_TABLE_keys(hash_table *map);
 
+
 void *HASH_TABLE_get(hash_table *map, void *key_ptr);
 
 int HASH_TABLE_contains(hash_table *map, void *key_ptr);

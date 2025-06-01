@@ -37,6 +37,23 @@ static uint32_t key_to_hash_index(hash_table* map,void* key_ptr, uint32_t size){
     return hash_function(hash, size);
 }
 
+
+static int get_kv_pairs(hash_table *map, kv_pair** ptr, size_t ptr_alloc_size){
+    if (map->entries * sizeof(kv_pair*) > ptr_alloc_size) return 1;
+
+    int i = 0; int j = 0;
+
+    while(i < map->size){
+        kv_pair *tmp = map->pairs[i++];
+        while(tmp != NULL){
+            ptr[j++] = tmp;
+            tmp = tmp->next;
+        }
+    }
+
+    return 0;
+}
+
 void **HASH_TABLE_keys(hash_table *map)
 {
     void **keys_set_ptr = calloc(map->entries, sizeof(void *));
@@ -58,7 +75,7 @@ void **HASH_TABLE_keys(hash_table *map)
     return keys_set_ptr;
 }
 
-static int put(uint32_t index, kv_pair** pairs, uint32_t map_size, void *key_ptr, void *val_ptr)
+static int put(uint32_t index, kv_pair** pairs, uint32_t map_size, kv_pair* new_pair)
 {
     if (index >= map_size)
         return MAP_KEY_INDEX_OUT_OF_BOUNDS;
@@ -73,7 +90,6 @@ static int put(uint32_t index, kv_pair** pairs, uint32_t map_size, void *key_ptr
 
     ERROR_CHECK();
 
-    kv_pair *new_pair = calloc(1, sizeof(kv_pair));
     if (prev == NULL)
     {
         pairs[index] = new_pair;
@@ -88,8 +104,6 @@ static int put(uint32_t index, kv_pair** pairs, uint32_t map_size, void *key_ptr
 
     ERROR_CHECK();
 
-    new_pair->key_ptr = key_ptr;
-    new_pair->data_ptr = val_ptr;
 
     return 0;
 }
@@ -147,8 +161,8 @@ static int resize(hash_table *map, uint32_t new_size)
     }*/
 
     map->last_checked.key_ptr = NULL;
-    void **key_set;
-    key_set = HASH_TABLE_keys(map);
+    kv_pair** kv_set = calloc(map->entries, sizeof(kv_pair*));
+    get_kv_pairs(map, kv_set, map->entries * sizeof(kv_pair*));
 
 
     ERROR_CHECK();
@@ -157,11 +171,11 @@ static int resize(hash_table *map, uint32_t new_size)
     uint32_t hashindex;
     for (int i = 0; i < map->entries; i++)
     {
-        valptr = HASH_TABLE_get(map, key_set[i]);
-        hashindex = key_to_hash_index(map, key_set[i], map->size);
-        delete(hashindex, map->pairs, key_set[i], map->size);
-        hashindex = key_to_hash_index(map, key_set[i], new_size);
-        if (put(hashindex, pairs, new_size, key_set[i], valptr) != 0) return MAP_RESIZE_FAILED;
+        //hashindex = key_to_hash_index(map, kv_set[i]->key_ptr, map->size);
+        //delete(hashindex, map->pairs, key_set[i], map->size);
+        hashindex = key_to_hash_index(map, kv_set[i]->key_ptr, new_size);
+        kv_set[i]->next = NULL;
+        if (put(hashindex, pairs, new_size, kv_set[i]) != 0) return MAP_RESIZE_FAILED;
     }
 
     ERROR_CHECK();
@@ -170,7 +184,7 @@ static int resize(hash_table *map, uint32_t new_size)
     map->size = new_size;
 
     free(map->pairs);
-    free(key_set);
+    free(kv_set);
     map->pairs = pairs;
 
     ERROR_CHECK();
@@ -200,11 +214,19 @@ int HASH_TABLE_put(hash_table *map, void *key_ptr, void *val_ptr)
 
     ERROR_CHECK();
 
-    int retVal = put(index, map->pairs, map->size, key_ptr, val_ptr);
-    if (retVal != 0)
+    kv_pair* new_pair = calloc(1, sizeof(kv_pair));
+    int retVal = put(index, map->pairs, map->size, new_pair);
+    ERROR_CHECK();
+    if (retVal != 0){
+        free(new_pair);
         return retVal;
+    }
 
+    new_pair->key_ptr = key_ptr;
+    new_pair->data_ptr = val_ptr;
     map->entries++;
+
+    ERROR_CHECK();
 
     return 0;
 }
