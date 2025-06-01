@@ -48,8 +48,8 @@ int main(int argc, char** argv){
     saved_elem = get(list, 0);
     assert(saved_elem != NULL);
     assert(strcmp(saved_elem->msg, e.msg) == 0);
-    assert(saved_elem->x = e.x);
-    assert(saved_elem->y = e.y);
+    assert(saved_elem->x == e.x);
+    assert(saved_elem->y == e.y);
 
    // traverse_list(list, printer);
 
