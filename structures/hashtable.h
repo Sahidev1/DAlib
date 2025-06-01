@@ -25,6 +25,7 @@ typedef uint32_t hkey_t;
 typedef struct Hash_table{
     uint32_t size; //indices available
     uint32_t entries; // total entries
+    uint32_t init_capacity;
     hkey_t (*hash_code) (void* dataptr);
     kv_pair last_checked;
     kv_pair** pairs;// array of node entries

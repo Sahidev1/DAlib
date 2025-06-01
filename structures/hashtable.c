@@ -5,19 +5,20 @@
 #include <stdio.h>
 
 #if defined TESTMODE
-#define ERROR_CHECK() ({ printf("CHECK line %d\n", __LINE__); });
-#define RESIZE_TRIGGERED() (printf("RESIZE TRIGGERED\n"));
-#define MAX_ENTRIES_PER_KEY 2
+    #define ERROR_CHECK() ({ printf("CHECK line %d\n", __LINE__); });
+    #define RESIZE_TRIGGERED(ns,os) (printf("RESIZE TRIGGERED new: %d, old:%d\n", ns, os));
+    #define MAX_ENTRIES_PER_INDEX 2
 #else
-#define ERROR_CHECK() ;
-#define RESIZE_TRIGGERED() ;
-#define MAX_ENTRIES_PER_KEY 8
+    #define ERROR_CHECK() ;
+    #define RESIZE_TRIGGERED(ns,os) ;
+    #define MAX_ENTRIES_PER_INDEX 8
 #endif
 
 int HASH_TABLE_init(hash_table *map, const uint32_t INIT_CAPACITY, hkey_t (*hash_code)(void *key_ptr))
 {
     map->entries = 0;
     map->size = INIT_CAPACITY;
+    map->init_capacity = INIT_CAPACITY;
     map->hash_code = hash_code;
     map->pairs = calloc(INIT_CAPACITY, sizeof(kv_pair*));
 
@@ -144,7 +145,7 @@ static int delete(uint32_t index, kv_pair** pairs, void *key_ptr, uint32_t size)
  */
 static int resize(hash_table *map, uint32_t new_size)
 {
-    RESIZE_TRIGGERED();
+    RESIZE_TRIGGERED(new_size, map->size);
     ERROR_CHECK();
     // map->pairs = realloc(map->pairs, new_size * sizeof(kv_pair));
     kv_pair **pairs = calloc(new_size, sizeof(kv_pair*));
@@ -198,7 +199,7 @@ int HASH_TABLE_put(hash_table *map, void *key_ptr, void *val_ptr)
     if (map->hash_code == NULL)
         return MAP_NO_HASHCODE_FUNCTION;
     ERROR_CHECK();
-    if (map->entries >= map->size * MAX_ENTRIES_PER_KEY)
+    if (map->entries >= map->size * MAX_ENTRIES_PER_INDEX)
     {
         
         if (resize(map, 2 * map->size) != 0)
@@ -272,7 +273,7 @@ int HASH_TABLE_contains(hash_table *map, void *key_ptr)
     // save in last checked field
     map->last_checked.key_ptr = key_ptr;
     map->last_checked.data_ptr = val_ptr;
-    return val_ptr == NULL ? 0 : 1;
+    return val_ptr != NULL;
 }
 
 int HASH_TABLE_delete(hash_table *map, void *key_ptr)
@@ -287,6 +288,11 @@ int HASH_TABLE_delete(hash_table *map, void *key_ptr)
         return retVal;
 
     map->entries--;
+
+    if(map->size > map->init_capacity && map->entries < map->size / 2){
+        if (resize(map, map->size / 2) != 0) return MAP_RESIZE_FAILED;
+
+    }
 
     return 0;
 }

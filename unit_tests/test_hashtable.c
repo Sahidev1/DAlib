@@ -104,13 +104,20 @@ int main()
     assert(keys_test == testval);
 
 
-    for (int i = 0; i < kv_count; i++)
+    for (int i = 0; i < kv_count ; i++)
     {
         assert(HASH_TABLE_delete(&table, &keys[i]) == 0);
         assert(HASH_TABLE_contains(&table, &keys[i]) == 0);
+        if (i + 1 < kv_count){
+            assert(HASH_TABLE_contains(&table, &keys[i + 1]) != 0);
+        }
     }
 
+    
     assert(table.entries == 0);
+    assert(table.size == INIT_CAPACITY);
+
+    printf("UNIT TEST PASSED!\n");
 
     return 0;
 }
