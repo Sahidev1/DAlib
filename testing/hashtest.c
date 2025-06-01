@@ -17,7 +17,7 @@ hkey_t hashcode(void* key){
     return data->X ^ data->Y;
 }
 
-void printmap(hash_table* map){
+void printmap(pointer_table* map){
     printf("Map addr: %p\n", map);
 
     printf("Entries: %d\n", map->entries);
@@ -27,9 +27,9 @@ void printmap(hash_table* map){
 
 int main(){
     
-    hash_table map;
+    pointer_table map;
 
-    HASH_TABLE_init(&map, INIT_CAPACITY, &hashcode);
+    POINTER_TABLE_init(&map, INIT_CAPACITY, &hashcode);
 
 
 
@@ -39,28 +39,28 @@ int main(){
     Value v0 = {.descriptor="dog location"};
     Key k1 = {.X = 3, .Y = 4};
     Value v1 = {.descriptor="box location"};
-    HASH_TABLE_put(&map, &k, &v);
-    HASH_TABLE_put(&map, &k0, &v0);
+    POINTER_TABLE_put(&map, &k, &v);
+    POINTER_TABLE_put(&map, &k0, &v0);
     printTable(&map);
     
 
-    printf("resize: %d\n",HASH_TABLE_put(&map, &k1, &v1));
+    printf("resize: %d\n",POINTER_TABLE_put(&map, &k1, &v1));
     printmap(&map);
     printTable(&map);
 
-    Value* hv = HASH_TABLE_get(&map, &k);
+    Value* hv = POINTER_TABLE_get(&map, &k);
     printf("val PTR: %p, %p\n", &v, hv );
     printf("VALUE: %s\n", hv->descriptor);
 
     printTable(&map);
 
-    int contains = HASH_TABLE_contains(&map, &k1);
+    int contains = POINTER_TABLE_contains(&map, &k1);
     printf("contains: %s\n", contains == 0?"false":"true");
     
-    printf("delete: %d\n",HASH_TABLE_delete(&map, &k1));
-    contains = HASH_TABLE_contains(&map, &k1);
+    printf("delete: %d\n",POINTER_TABLE_delete(&map, &k1));
+    contains = POINTER_TABLE_contains(&map, &k1);
     printf("contains: %s\n", contains == 0?"false":"true");
-    printf("delete: %d\n",HASH_TABLE_delete(&map, &k1));
+    printf("delete: %d\n",POINTER_TABLE_delete(&map, &k1));
     printTable(&map);
 
 
