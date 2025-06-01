@@ -64,10 +64,15 @@ int main()
         i++;
     }
 
+    HASH_TABLE_put(&table, &keys[0], &values[1]);
+
     //printf("\tgott outsidex: %p\n", HASH_TABLE_get(&table, &keys[0]));
 
     //LINECHECK();
     assert(table.entries == kv_count);
+    HASH_TABLE_put(&table, &keys[0], &values[0]);
+    assert(table.entries == kv_count);
+
 
 #ifndef TESTMODE
     assert(table.size == 2 * INIT_CAPACITY);

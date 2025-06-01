@@ -38,6 +38,19 @@ static uint32_t key_to_hash_index(hash_table* map,void* key_ptr, uint32_t size){
     return hash_function(hash, size);
 }
 
+static kv_pair* find_kv_pair(hash_table* map,void* key){
+    int index = key_to_hash_index(map, key, map->size);
+
+    kv_pair* ptr = map->pairs[index];
+    while(ptr != NULL){
+        if (ptr->key_ptr == key){
+            return ptr;
+        }
+        ptr = ptr->next;
+    }
+
+    return NULL;
+}
 
 static int get_kv_pairs(hash_table *map, kv_pair** ptr, size_t ptr_alloc_size){
     if (map->entries * sizeof(kv_pair*) > ptr_alloc_size) return 1;
@@ -199,6 +212,13 @@ int HASH_TABLE_put(hash_table *map, void *key_ptr, void *val_ptr)
     if (map->hash_code == NULL)
         return MAP_NO_HASHCODE_FUNCTION;
     ERROR_CHECK();
+
+    kv_pair* search = find_kv_pair(map, key_ptr);
+    if (search != NULL){
+        search->data_ptr = val_ptr;
+        return 0;
+    }
+
     if (map->entries >= map->size * MAX_ENTRIES_PER_INDEX)
     {
         
