@@ -14,7 +14,9 @@
     #define MAX_ENTRIES_PER_INDEX 8
 #endif
 
-int POINTER_TABLE_init(pointer_table *map, const uint32_t INIT_CAPACITY, hkey_t (*hash_code)(void *key_ptr))
+
+
+int POINTER_TABLE_init(pointer_table *map, const size_t INIT_CAPACITY, hkey_t (*hash_code)(void *key_ptr))
 {
     map->entries = 0;
     map->size = INIT_CAPACITY;
@@ -29,14 +31,14 @@ int POINTER_TABLE_init(pointer_table *map, const uint32_t INIT_CAPACITY, hkey_t 
 }
 
 
-static uint32_t hash_function(hkey_t key_code, uint32_t size)
+uint64_t POINTER_TABLE_hash_function(hkey_t key_code, size_t size)
 {
-    return ((key_code ^ (key_code >> 16)) & 0x7fffffff) % size;
+    return ((key_code ^ (key_code >> 32)) & 0x7fffffffffffffff) % size;
 }
 
-static uint32_t key_to_hash_index(pointer_table* map,void* key_ptr, uint32_t size){
+static uint64_t key_to_hash_index(pointer_table* map,void* key_ptr, size_t size){
     hkey_t hash = map->hash_code(key_ptr);
-    return hash_function(hash, size);
+    return POINTER_TABLE_hash_function(hash, size);
 }
 
 static kv_ptr_pair* find_kv_pair(pointer_table* map,void* key){
@@ -69,12 +71,16 @@ static int get_kv_pairs(pointer_table *map, kv_ptr_pair** ptr, size_t ptr_alloc_
     return 0;
 }
 
-void **POINTER_TABLE_keys(pointer_table *map)
+int POINTER_TABLE_keys(pointer_table *map, void** keys_set_ptr, size_t keys_set_alloc_size)
 {
-    void **keys_set_ptr = calloc(map->entries, sizeof(void *));
-
     int i = 0;
     int j = 0;
+
+    if(keys_set_alloc_size < map->entries*sizeof(void*)) return 1;
+
+    for(int k = 0; k < map->entries; k++){
+        *(keys_set_ptr + k) = NULL;
+    }
 
     while (i < map->size)
     {
@@ -87,10 +93,10 @@ void **POINTER_TABLE_keys(pointer_table *map)
         }
     }
 
-    return keys_set_ptr;
+    return 0;
 }
 
-static int put(uint32_t index, kv_ptr_pair** pairs, uint32_t map_size, kv_ptr_pair* new_pair)
+static int put(uint64_t index, kv_ptr_pair** pairs, size_t map_size, kv_ptr_pair* new_pair)
 {
     if (index >= map_size)
         return MAP_KEY_INDEX_OUT_OF_BOUNDS;
@@ -123,7 +129,7 @@ static int put(uint32_t index, kv_ptr_pair** pairs, uint32_t map_size, kv_ptr_pa
     return 0;
 }
 
-static int delete(uint32_t index, kv_ptr_pair** pairs, void *key_ptr, uint32_t size)
+static int delete(uint64_t index, kv_ptr_pair** pairs, void *key_ptr, uint64_t size)
 {
     if (index >= size)
         return MAP_KEY_INDEX_OUT_OF_BOUNDS;
@@ -157,7 +163,7 @@ static int delete(uint32_t index, kv_ptr_pair** pairs, void *key_ptr, uint32_t s
 /**
  * map points to pointer_table, new_size is the new number of array indices
  */
-static int resize(pointer_table *map, uint32_t new_size)
+static int resize(pointer_table *map, uint64_t new_size)
 {
     RESIZE_TRIGGERED(new_size, map->size);
     ERROR_CHECK();
@@ -169,7 +175,7 @@ static int resize(pointer_table *map, uint32_t new_size)
         return MEM_ALLOCATION_FAILED;
     ERROR_CHECK();
     /*if (new_size > map->size){
-        uint32_t i = map->size;
+        uint64_t i = map->size;
         while (i < new_size){
             map->pairs[i++] = NULL;
         }
@@ -183,7 +189,7 @@ static int resize(pointer_table *map, uint32_t new_size)
     ERROR_CHECK();
 
     void *valptr;
-    uint32_t hashindex;
+    uint64_t hashindex;
     for (int i = 0; i < map->entries; i++)
     {
         //hashindex = key_to_hash_index(map, kv_set[i]->key_ptr, map->size);
@@ -232,7 +238,7 @@ int POINTER_TABLE_put(pointer_table *map, void *key_ptr, void *val_ptr)
     ERROR_CHECK();
 
     hkey_t hash = map->hash_code(key_ptr);
-    uint32_t index = hash_function(hash, map->size);
+    uint64_t index = POINTER_TABLE_hash_function(hash, map->size);
 
     ERROR_CHECK();
 
@@ -268,7 +274,7 @@ void *POINTER_TABLE_get(pointer_table *map, void *key_ptr)
     ERROR_CHECK();
 
     hkey_t hash = map->hash_code(key_ptr);
-    uint32_t index = hash_function(hash, map->size);
+    uint64_t index = POINTER_TABLE_hash_function(hash, map->size);
 
     if (index >= map->size)
         return NULL;
@@ -302,7 +308,7 @@ int POINTER_TABLE_delete(pointer_table *map, void *key_ptr)
     map->last_checked.key_ptr = NULL;
 
     hkey_t hash = map->hash_code(key_ptr);
-    uint32_t index = hash_function(hash, map->size);
+    uint64_t index = POINTER_TABLE_hash_function(hash, map->size);
 
     int retVal = delete(index, map->pairs, key_ptr, map->size);
     if (retVal != 0)
@@ -318,7 +324,7 @@ int POINTER_TABLE_delete(pointer_table *map, void *key_ptr)
     return 0;
 }
 
-void HASH_TABLE_destoy(pointer_table* map){
+void POINTER_TABLE_destroy(pointer_table* map){
     kv_ptr_pair** kv_set = calloc(map->entries ,sizeof(kv_ptr_pair*));
     get_kv_pairs(map, kv_set, map->entries * sizeof(kv_ptr_pair*));
 
@@ -336,7 +342,7 @@ void HASH_TABLE_destoy(pointer_table* map){
 void printTable(pointer_table* map){
     printf("\n");
     printf("--PRINTING HASHTABLE--\n");
-    printf("\tSIZE: %d\n\tENTRIES: %d\n", map->size, map->entries);
+    printf("\tSIZE: %ld\n\tENTRIES: %ld\n", map->size, map->entries);
     printf("\tLAST_CHECKED: key: %p, val: %p\n", map->last_checked.key_ptr, map->last_checked.data_ptr);
     printf("\t--PRINTING_KVPAIRS--\n");
     

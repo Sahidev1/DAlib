@@ -1,6 +1,7 @@
 #include "../structures/pointer_table.h"
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef int test_key;
 typedef float value;
@@ -96,7 +97,11 @@ int main()
         assert(tmp == &values[i]);
     }
 
-    void** keyset = POINTER_TABLE_keys(&table);
+    pointer_table* tptr = &table;
+    size_t key_set_allocsize = KEYS_ALLOCSIZE(tptr);
+    assert(key_set_allocsize == sizeof(void*) * tptr->entries);
+    void** keyset = malloc(key_set_allocsize);
+    POINTER_TABLE_keys(&table, keyset, key_set_allocsize);
     int keys_test = 0;
     int testval = ((unsigned int)(~0x0))>>(8*sizeof(unsigned int) - kv_count);
 
